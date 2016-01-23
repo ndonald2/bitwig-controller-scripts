@@ -46,12 +46,12 @@ function init() {
   cursorDevice = host.createEditorCursorDevice();
 
   inPort.setMidiCallback(onMidi);
-  createChannelRoutings();
+  setupChannelRoutings();
 }
 
 function exit() {}
 
-function createChannelRoutings() {
+function setupChannelRoutings() {
   inPort.createNoteInput("BeatStep Seq 1", SEQ_1_INPUT_FILTER);
   inPort.createNoteInput("BeatStep Seq 2", SEQ_2_INPUT_FILTER);
   inPort.createNoteInput("BeatStep Drum", DRUM_SEQ_INPUT_FILTER);
@@ -65,12 +65,8 @@ function onMidi(status, data1, data2) {
 
 /// Control Mode Functions
 
-function isControlMessage(status) {
-  return (status & 0xF0) == 0xB0;
-}
-
 function isControlModeChannel(status) {
-  var channel = (status & 0x0F) + 1;
+  var channel = getMidiChannel(status);
   return channel == CONTROL_MODE_CHANNEL;
 }
 
@@ -99,5 +95,21 @@ function handleControlModeMessage(status, data1, data2) {
 
 function handleMacroControl(index, value) {
   var macro = cursorDevice.getMacro(index);
-  macro.getAmount().set(value, 128);
+  var increment = getRelativeIncrement(value);
+  macro.getAmount().inc(increment, 128);
+}
+
+/// MIDI Utils
+
+// Returns channel value 1-16
+function getMidiChannel(status) {
+  return (status & 0x0F) + 1;
+}
+
+function isControlMessage(status) {
+  return (status & 0xF0) == 0xB0;
+}
+
+function getRelativeIncrement(value) {
+  return value - 64;
 }
