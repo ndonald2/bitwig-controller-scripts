@@ -3,8 +3,8 @@
 //
 // Features:
 //  - [x] Channel routings for each sequencer
-//  - [ ] 8-Macro control via knob sets 1 and 3 in Control Mode
-//  - [ ] Track Selection (1-16)
+//  - [x] 8-Macro control via knob sets 1 and 3 in Control Mode
+//  - [x] Track Selection (1-16)
 //  - [ ] Device selection within current track
 //  - [ ] Transport Mappings (BeatStep slaved to Bitwig)
 
@@ -24,7 +24,9 @@ var SEQ_2_INPUT_FILTER = "?1????";
 var DRUM_SEQ_INPUT_FILTER = "?9????";
 
 var MACRO_CC_START = 20;
-var CHANNEL_SELECT_CC_START = 102;
+var TRACK_SELECT_CC_START = 102;
+
+var NUM_SELECTABLE_TRACKS = 16;
 
 // Initialization and Controller Definition
 
@@ -36,20 +38,29 @@ host.addDeviceNameBasedDiscoveryPair([DEVICE_NAME], [DEVICE_NAME]);
 // Script Variables
 var inPort;
 var outPort;
+var mainTrackBank;
+var cursorTrack;
 var cursorDevice;
+
+var trackSelectedByController = false;
 
 // Script Overrides
 
 function init() {
-  inPort = host.getMidiInPort(0);
-  outPort = host.getMidiOutPort(0);
-  cursorDevice = host.createEditorCursorDevice();
-
-  inPort.setMidiCallback(onMidi);
+  initializeVariables();
   setupChannelRoutings();
+  inPort.setMidiCallback(onMidi);
 }
 
 function exit() {}
+
+function initializeVariables() {
+  inPort = host.getMidiInPort(0);
+  outPort = host.getMidiOutPort(0);
+  mainTrackBank = host.createMainTrackBank(NUM_SELECTABLE_TRACKS, 0, 0);
+  cursorTrack = host.createCursorTrack(2, 0);
+  cursorDevice = host.createEditorCursorDevice();
+}
 
 function setupChannelRoutings() {
   inPort.createNoteInput("BeatStep Seq 1", SEQ_1_INPUT_FILTER);
@@ -74,8 +85,17 @@ function isMacroControlNumber(control_num) {
   return control_num >= MACRO_CC_START && control_num < MACRO_CC_START + 8;
 }
 
+function isTrackSelectionControlNumber(control_num) {
+  return control_num >= TRACK_SELECT_CC_START &&
+    control_num < TRACK_SELECT_CC_START + NUM_SELECTABLE_TRACKS;
+}
+
 function controlNumToMacroIndex(control_num) {
   return control_num - MACRO_CC_START;
+}
+
+function controlNumToTrackIndex(control_num) {
+  return control_num - TRACK_SELECT_CC_START;
 }
 
 function handleControlModeMessage(status, data1, data2) {
@@ -89,6 +109,11 @@ function handleControlModeMessage(status, data1, data2) {
       var macroIndex = controlNumToMacroIndex(data1);
       handleMacroControl(macroIndex, data2);
     }
+    // Track navigation
+    else if (isTrackSelectionControlNumber(data1)) {
+      var trackIndex = controlNumToTrackIndex(data1);
+      handleTrackSelectControl(trackIndex, data2);
+    }
 
   }
 }
@@ -97,6 +122,18 @@ function handleMacroControl(index, value) {
   var macro = cursorDevice.getMacro(index);
   var increment = getRelativeIncrement(value);
   macro.getAmount().inc(increment, 128);
+}
+
+function handleTrackSelectControl(index, value) {
+  if (value == 0) {
+    return;
+  }
+
+  trackSelectedByController = true;
+  var track = mainTrackBank.getChannel(index);
+  track.selectInEditor();
+  var primaryDevice = track.createCursorDevice("Primary");
+  primaryDevice.selectInEditor();
 }
 
 /// MIDI Utils
