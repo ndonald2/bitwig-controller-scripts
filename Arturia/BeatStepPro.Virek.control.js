@@ -120,7 +120,7 @@ function handleControlModeMessage(status, data1, data2) {
 
 function handleMacroControl(index, value) {
   var macro = cursorDevice.getMacro(index);
-  var increment = getRelativeIncrement(value);
+  var increment = getRelativeIncrement(value) * 2.0;
   macro.getAmount().inc(increment, 128);
 }
 
