@@ -90,6 +90,7 @@ function isTrackSelectionControlNumber(control_num) {
     control_num < TRACK_SELECT_CC_START + NUM_SELECTABLE_TRACKS;
 }
 
+
 function controlNumToMacroIndex(control_num) {
   return control_num - MACRO_CC_START;
 }
@@ -114,6 +115,9 @@ function handleControlModeMessage(status, data1, data2) {
       var trackIndex = controlNumToTrackIndex(data1);
       handleTrackSelectControl(trackIndex, data2);
     }
+  }
+  // Aftertouch to CC conversion
+  else if (isAftertouchMessage(status)) {
 
   }
 }
@@ -145,6 +149,10 @@ function getMidiChannel(status) {
 
 function isControlMessage(status) {
   return (status & 0xF0) == 0xB0;
+}
+
+function isAftertouchMessage(status) {
+  return (status & 0xF0) == 0xA0;
 }
 
 function getRelativeIncrement(value) {
