@@ -1,12 +1,12 @@
-// Bitwig Control Script for BeatStep Pro
+// Bitwig Generic Script for BeatStep Pro
 // by Nick Donaldson, 2016
 //
 // Features:
-//  - [x] Channel routings for each sequencer
-//  - [x] 8-Macro control via knob sets 1 and 3 in Control Mode
-//  - [x] Track Selection (1-16)
-//  - [ ] Device selection within current track
-//  - [ ] Transport Mappings (BeatStep slaved to Bitwig)
+//  - Channel routings for each sequencer
+//  - 8-Macro control via knob sets 1 and 3 in Control Mode
+//  - Track Selection (1-16)
+
+load('../Utils/MIDIUtils.js');
 
 // Global constants
 
@@ -31,7 +31,7 @@ var NUM_SELECTABLE_TRACKS = 16;
 // Initialization and Controller Definition
 
 loadAPI(SCRIPT_API_VERSION);
-host.defineController("Arturia", "BeatStep Pro", SCRIPT_VERSION, SCRIPT_UUID, "Nick Donaldson");
+host.defineController("Arturia", "BeatStep Pro (Generic)", SCRIPT_VERSION, SCRIPT_UUID, "Nick Donaldson");
 host.defineMidiPorts(NUM_PORTS_IN, NUM_PORTS_OUT);
 host.addDeviceNameBasedDiscoveryPair([DEVICE_NAME], [DEVICE_NAME]);
 
@@ -90,7 +90,6 @@ function isTrackSelectionControlNumber(control_num) {
     control_num < TRACK_SELECT_CC_START + NUM_SELECTABLE_TRACKS;
 }
 
-
 function controlNumToMacroIndex(control_num) {
   return control_num - MACRO_CC_START;
 }
@@ -116,10 +115,6 @@ function handleControlModeMessage(status, data1, data2) {
       handleTrackSelectControl(trackIndex, data2);
     }
   }
-  // Aftertouch to CC conversion
-  else if (isAftertouchMessage(status)) {
-
-  }
 }
 
 function handleMacroControl(index, value) {
@@ -140,21 +135,3 @@ function handleTrackSelectControl(index, value) {
   primaryDevice.selectInEditor();
 }
 
-/// MIDI Utils
-
-// Returns channel value 1-16
-function getMidiChannel(status) {
-  return (status & 0x0F) + 1;
-}
-
-function isControlMessage(status) {
-  return (status & 0xF0) == 0xB0;
-}
-
-function isAftertouchMessage(status) {
-  return (status & 0xF0) == 0xA0;
-}
-
-function getRelativeIncrement(value) {
-  return value - 64;
-}
