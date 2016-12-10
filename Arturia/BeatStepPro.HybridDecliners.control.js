@@ -113,25 +113,38 @@ function drumShiftOn() {
 
 function getDrumPadIndex(ccNum) {
   // Slightly complicated due to bank-ordered encoders
-  if (ccNum >= ENCODER_BANK1_START && ccNum < ENCODER_BANK1_START + 8) {
-    if (ccNum < ENCODER_BANK1_START + 4) {
-      return 8 + (ccNum - ENCODER_BANK1_START);
+  var bankIndex = getEncoderIndexInBank(ccNum);
+  if (isEncoderInBank1(ccNum)) {
+    if (bankIndex < 4) {
+      return 8 + bankIndex;
     } else {
-      return (ccNum - ENCODER_BANK1_START - 4);
+      return bankIndex - 4;
     }
-  } else if (ccNum >= ENCODER_BANK2_START && ccNum < ENCODER_BANK2_START + 8) {
-    if (ccNum < ENCODER_BANK2_START + 4) {
-      return 12 + (ccNum - ENCODER_BANK2_START);
+  } else if (isEncoderInBank2(ccNum)) {
+    if (bankIndex < 4) {
+      return 12 + bankIndex;
     } else {
-      return 4 + (ccNum - ENCODER_BANK2_START - 4);
+      return bankIndex;
     }
   }
 }
 
 function handleDrumEncoderInput(ccNum, ccVal) {
   var padIndex = getDrumPadIndex(ccNum);
+  println("Pad index: " + padIndex);
+}
+
+function getChannelIndex(ccNum) {
+  var bankIndex = getEncoderIndexInBank(ccNum);
+  var channelIndex = bankIndex % 4;
+  if (isEncoderInBank2(ccNum)) {
+    channelIndex += 4;
+  }
+  return channelIndex;
 }
 
 function handleMixEncoderInput(ccNum, ccVal) {
-
+  var channelIndex = getChannelIndex(ccNum);
+  println("Channel Index: " + channelIndex);
 }
+

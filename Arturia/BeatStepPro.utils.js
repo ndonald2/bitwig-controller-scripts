@@ -34,7 +34,22 @@ function isControlModeChannel(status) {
 }
 
 function isEncoderControlNumber(controlNum) {
-  return (controlNum >= ENCODER_BANK1_START && controlNum < ENCODER_BANK1_START + 8) ||
-         (controlNum >= ENCODER_BANK2_START && controlNum < ENCODER_BANK2_START + 8);
+  return isEncoderInBank1(controlNum) || isEncoderInBank2(controlNum);
+}
+
+function isEncoderInBank1(controlNum) {
+  return (controlNum >= ENCODER_BANK1_START && controlNum < ENCODER_BANK1_START + 8);
+}
+
+function isEncoderInBank2(controlNum) {
+  return (controlNum >= ENCODER_BANK2_START && controlNum < ENCODER_BANK2_START + 8);
+}
+
+function getEncoderIndexInBank(controlNum) {
+  if (isEncoderInBank1(controlNum)) {
+    return controlNum - ENCODER_BANK1_START;
+  } else if (isEncoderInBank2(controlNum)) {
+    return controlNum - ENCODER_BANK2_START;
+  }
 }
 
