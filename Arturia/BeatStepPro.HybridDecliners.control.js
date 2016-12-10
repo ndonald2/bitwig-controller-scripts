@@ -49,6 +49,10 @@ function onMidi(status, data1, data2) {
 
 /// Control Mode
 
+var DRUM_MIX_SHIFT_NOTE = 36;
+var DRUM_VERB_SHIFT_NOTE = 37;
+var DRUM_DELAY_SHIFT_NOTE = 38;
+
 var drumMixShift = false;
 var drumVerbShift = false;
 var drumDelayShift = false;
@@ -57,11 +61,27 @@ function handleControlModeMessage(status, data1, data2) {
   println("Got control mode message: " + status + ", " + data1 + ", " + data2);
 
   if (isNoteOnMessage(status)) {
-    println("Note On: " + data1);
+    updateShifts(true, data1);
   } else if (isNoteOffMessage(status)) {
-    println("Note Off: " + data1);
+    updateShifts(false, data1);
   } else if (isControlMessage(status)) {
 
   }
+}
+
+function updateShifts(noteOn, noteNum) {
+  switch(noteNum) {
+    case DRUM_MIX_SHIFT_NOTE:
+      drumMixShift = noteOn;
+      break;
+    case DRUM_VERB_SHIFT_NOTE:
+      drumVerbShift = noteOn;
+      break;
+    case DRUM_DELAY_SHIFT_NOTE:
+      drumDelayShift = noteOn;
+      break;
+    default:
+      break;
+  };
 }
 
