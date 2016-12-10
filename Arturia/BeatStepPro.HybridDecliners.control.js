@@ -22,24 +22,19 @@ var mainTrackBank;
 // Script Overrides
 
 function init() {
-  initializeVariables();
-  setupChannelRoutings();
-  inPort.setMidiCallback(onMidi);
-}
-
-function exit() {}
-
-function initializeVariables() {
   inPort = host.getMidiInPort(0);
   outPort = host.getMidiOutPort(0);
   mainTrackBank = host.createMainTrackBank(8, 2, 0);
-}
 
-function setupChannelRoutings() {
   inPort.createNoteInput("BeatStep Seq 1", SEQ_1_INPUT_FILTER);
   inPort.createNoteInput("BeatStep Seq 2", SEQ_2_INPUT_FILTER);
   inPort.createNoteInput("BeatStep Drum", DRUM_SEQ_INPUT_FILTER);
+
+  inPort.setMidiCallback(onMidi);
+  createPadBankIfNecessary();
 }
+
+function exit() {}
 
 function onMidi(status, data1, data2) {
   if (isControlModeChannel(status)) {
@@ -129,9 +124,44 @@ function getDrumPadIndex(ccNum) {
   }
 }
 
+var DRUM_CHANNEL_INDEX = 0;
+
+var drumPadBank = null;
+
+function createPadBankIfNecessary() {
+  if (drumPadBank !== null) {
+    return true;
+  }
+  var drumChannel = mainTrackBank.getChannel(DRUM_CHANNEL_INDEX);
+  var drumRack = drumChannel.getPrimaryInstrument();
+  if (drumRack === null || !drumRack.hasDrumPads()) {
+    println("Could not create drum pad bank: project layout is not valid");
+    return false;
+  }
+  drumPadBank = drumRack.createDrumPadBank(16);
+  return true;
+}
+
 function handleDrumEncoderInput(ccNum, ccVal) {
+  if (!createPadBankIfNecessary()) {
+    return;
+  }
+
   var padIndex = getDrumPadIndex(ccNum);
-  println("Pad index: " + padIndex);
+  var padChannel = drumPadBank.getChannel(padIndex);
+  var increment = getRelativeIncrement(ccVal, 2.0);
+
+  padChannel.selectInMixer();
+
+  if (drumMixShift) {
+    padChannel.getVolume().inc(increment, 128);
+  } else if (drumPanShift) {
+    padChannel.getPan().inc(increment, 128);
+  } else if (drumSend1Shift) {
+    padChannel.getSend(0).inc(increment, 128);
+  } else if (drumSend2Shift) {
+    padChannel.getSend(1).inc(increment, 128);
+  }
 }
 
 function getChannelIndex(ccNum) {
@@ -147,6 +177,8 @@ function handleMixEncoderInput(ccNum, ccVal) {
   var channelIndex = getChannelIndex(ccNum);
   var increment = getRelativeIncrement(ccVal, 2.0);
   var channel = mainTrackBank.getChannel(channelIndex);
+
+  channel.selectInMixer();
 
   if (getEncoderIndexInBank(ccNum) < 4) {
     channel.getSend(0).inc(increment, 128);

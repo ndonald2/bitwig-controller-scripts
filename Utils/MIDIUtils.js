@@ -20,6 +20,6 @@ function isAftertouchMessage(status) {
 }
 
 function getRelativeIncrement(value, scale) {
-  return value - 64;
+  return (value - 64) * scale;
 }
 
