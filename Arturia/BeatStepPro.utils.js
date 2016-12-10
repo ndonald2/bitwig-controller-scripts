@@ -9,6 +9,21 @@ var SEQ_1_INPUT_FILTER = "?0????";
 var SEQ_2_INPUT_FILTER = "?1????";
 var DRUM_SEQ_INPUT_FILTER = "?9????";
 
+// An encoder "bank" is a group of 8 encoders stacked 4 over 4.
+// So, Set 1 & 3 form Bank 1 and Set 2 & 4 form Bank 2. Top left
+// is the start control number, incrementing horizontally and then back
+// to the bottom row.
+//
+//    (Set 1)
+//  0  1  2  3
+//  4  5  6  7
+//    (Set 3)
+//
+//     etc
+
+var ENCODER_BANK1_START = 20;
+var ENCODER_BANK2_START = 52;
+
 // Util Functions
 
 load('../Utils/MIDIUtils.js')
@@ -16,5 +31,10 @@ load('../Utils/MIDIUtils.js')
 function isControlModeChannel(status) {
   var channel = getMidiChannel(status);
   return channel == CONTROL_MODE_CHANNEL;
+}
+
+function isEncoderControlNumber(controlNum) {
+  return (controlNum >= ENCODER_BANK1_START && controlNum < ENCODER_BANK1_START + 8) ||
+         (controlNum >= ENCODER_BANK2_START && controlNum < ENCODER_BANK2_START + 8);
 }
 

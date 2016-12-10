@@ -50,21 +50,40 @@ function onMidi(status, data1, data2) {
 /// Control Mode
 
 var DRUM_MIX_SHIFT_NOTE = 36;
-var DRUM_VERB_SHIFT_NOTE = 37;
-var DRUM_DELAY_SHIFT_NOTE = 38;
+var DRUM_PAN_SHIFT_NOTE = 37;
+var DRUM_SEND1_SHIFT_NOTE = 38;
+var DRUM_SEND2_SHIFT_NOTE = 39;
 
 var drumMixShift = false;
-var drumVerbShift = false;
-var drumDelayShift = false;
+var drumPanShift = false;
+var drumSend1Shift = false;
+var drumSend2Shift = false;
 
 function handleControlModeMessage(status, data1, data2) {
   println("Got control mode message: " + status + ", " + data1 + ", " + data2);
 
   if (isNoteOnMessage(status)) {
+
     updateShifts(true, data1);
+
   } else if (isNoteOffMessage(status)) {
+
     updateShifts(false, data1);
+
   } else if (isControlMessage(status)) {
+
+    var ccNum = data1;
+    var ccVal = data2;
+
+    if (!isEncoderControlNumber(ccNum)) {
+      return;
+    }
+
+    if (drumShiftOn()) {
+      handleDrumEncoderInput(ccNum, ccVal);
+    } else {
+      handleMixEncoderInput(ccNum, ccVal);
+    }
 
   }
 }
@@ -74,14 +93,32 @@ function updateShifts(noteOn, noteNum) {
     case DRUM_MIX_SHIFT_NOTE:
       drumMixShift = noteOn;
       break;
-    case DRUM_VERB_SHIFT_NOTE:
-      drumVerbShift = noteOn;
+    case DRUM_PAN_SHIFT_NOTE:
+      drumPanShift = noteOn;
       break;
-    case DRUM_DELAY_SHIFT_NOTE:
-      drumDelayShift = noteOn;
+    case DRUM_SEND1_SHIFT_NOTE:
+      drumSend1Shift = noteOn;
+      break;
+    case DRUM_SEND2_SHIFT_NOTE:
+      drumSend2Shift = noteOn;
       break;
     default:
       break;
   };
 }
 
+function drumShiftOn() {
+  return drumMixShift || drumPanShift || drumSend1Shift || drumSend2Shift;
+}
+
+function getDrumPadIndex(ccNum) {
+
+}
+
+function handleDrumEncoderInput(ccNum, ccVal) {
+  var padIndex = getDrumPadIndex(ccNum);
+}
+
+function handleMixEncoderInput(ccNum, ccVal) {
+
+}
