@@ -60,7 +60,7 @@ var drumSend1Shift = false;
 var drumSend2Shift = false;
 
 function handleControlModeMessage(status, data1, data2) {
-  println("Got control mode message: " + status + ", " + data1 + ", " + data2);
+  //println("Got control mode message: " + status + ", " + data1 + ", " + data2);
 
   if (isNoteOnMessage(status)) {
 
@@ -112,7 +112,20 @@ function drumShiftOn() {
 }
 
 function getDrumPadIndex(ccNum) {
-
+  // Slightly complicated due to bank-ordered encoders
+  if (ccNum >= ENCODER_BANK1_START && ccNum < ENCODER_BANK1_START + 8) {
+    if (ccNum < ENCODER_BANK1_START + 4) {
+      return 8 + (ccNum - ENCODER_BANK1_START);
+    } else {
+      return (ccNum - ENCODER_BANK1_START - 4);
+    }
+  } else if (ccNum >= ENCODER_BANK2_START && ccNum < ENCODER_BANK2_START + 8) {
+    if (ccNum < ENCODER_BANK2_START + 4) {
+      return 12 + (ccNum - ENCODER_BANK2_START);
+    } else {
+      return 4 + (ccNum - ENCODER_BANK2_START - 4);
+    }
+  }
 }
 
 function handleDrumEncoderInput(ccNum, ccVal) {
