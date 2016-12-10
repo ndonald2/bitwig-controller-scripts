@@ -32,7 +32,7 @@ function exit() {}
 function initializeVariables() {
   inPort = host.getMidiInPort(0);
   outPort = host.getMidiOutPort(0);
-  mainTrackBank = host.createMainTrackBank(NUM_SELECTABLE_TRACKS, 0, 0);
+  mainTrackBank = host.createMainTrackBank(8, 0, 0);
 }
 
 function setupChannelRoutings() {
@@ -47,13 +47,20 @@ function onMidi(status, data1, data2) {
   }
 }
 
-/// Control Mode Functions
+/// Control Mode
+
+var drumMixShift = false;
+var drumVerbShift = false;
+var drumDelayShift = false;
 
 function handleControlModeMessage(status, data1, data2) {
-  //println("Got control mode message: " + status + ", " + data1 + ", " + data2);
+  println("Got control mode message: " + status + ", " + data1 + ", " + data2);
 
-  // Control Messages
-  if (isControlMessage(status)) {
+  if (isNoteOnMessage(status)) {
+    println("Note On: " + data1);
+  } else if (isNoteOffMessage(status)) {
+    println("Note Off: " + data1);
+  } else if (isControlMessage(status)) {
 
   }
 }

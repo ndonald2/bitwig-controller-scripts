@@ -3,6 +3,14 @@ function getMidiChannel(status) {
   return (status & 0x0F) + 1;
 }
 
+function isNoteOnMessage(status) {
+  return (status & 0xF0) == 0x90;
+}
+
+function isNoteOffMessage(status) {
+  return (status & 0xF0) == 0x80;
+}
+
 function isControlMessage(status) {
   return (status & 0xF0) == 0xB0;
 }
