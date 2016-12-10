@@ -6,22 +6,13 @@
 //  - 8-Macro control via knob sets 1 and 3 in Control Mode
 //  - Track Selection (1-16)
 
-load('../Utils/MIDIUtils.js');
+load('./BeatStepPro.utils.js');
 
 // Global constants
 
 var SCRIPT_API_VERSION = 1;
 var SCRIPT_VERSION = "0.1";
 var SCRIPT_UUID = "097cfe80-c210-11e5-a837-0800200c9a66";
-
-var DEVICE_NAME = "Arturia BeatStep Pro";
-var NUM_PORTS_IN = 1;
-var NUM_PORTS_OUT = 1;
-var CONTROL_MODE_CHANNEL = 5;
-
-var SEQ_1_INPUT_FILTER = "?0????";
-var SEQ_2_INPUT_FILTER = "?1????";
-var DRUM_SEQ_INPUT_FILTER = "?9????";
 
 var MACRO_CC_START = 20;
 var TRACK_SELECT_CC_START = 102;
@@ -75,11 +66,6 @@ function onMidi(status, data1, data2) {
 }
 
 /// Control Mode Functions
-
-function isControlModeChannel(status) {
-  var channel = getMidiChannel(status);
-  return channel == CONTROL_MODE_CHANNEL;
-}
 
 function isMacroControlNumber(control_num) {
   return control_num >= MACRO_CC_START && control_num < MACRO_CC_START + 8;
