@@ -44,26 +44,25 @@ function onMidi(status, data1, data2) {
 
 /// Control Mode
 
-var DRUM_MIX_SHIFT_NOTE = 36;
-var DRUM_PAN_SHIFT_NOTE = 37;
-var DRUM_SEND1_SHIFT_NOTE = 38;
-var DRUM_SEND2_SHIFT_NOTE = 39;
-
-var drumMixShift = false;
-var drumPanShift = false;
-var drumSend1Shift = false;
-var drumSend2Shift = false;
+var pressedPads = [];
 
 function handleControlModeMessage(status, data1, data2) {
   //println("Got control mode message: " + status + ", " + data1 + ", " + data2);
 
   if (isNoteOnMessage(status)) {
 
-    updateShifts(true, data1);
+    var padIndex = getPadIndex(data1);
+    if (padIndex !== null) {
+      pressedPads.remove(padIndex);
+      pressedPads.push(padIndex);
+    }
 
   } else if (isNoteOffMessage(status)) {
 
-    updateShifts(false, data1);
+    var padIndex = getPadIndex(data1);
+    if (padIndex !== null) {
+      pressedPads.remove(padIndex);
+    }
 
   } else if (isControlMessage(status)) {
 
@@ -74,53 +73,13 @@ function handleControlModeMessage(status, data1, data2) {
       return;
     }
 
-    if (drumShiftOn()) {
-      handleDrumEncoderInput(ccNum, ccVal);
+    if (!pressedPads.isEmpty()) {
+      var padIndex = pressedPads.last();
+      handleDrumEncoderInput(padIndex, ccNum, ccVal);
     } else {
       handleMixEncoderInput(ccNum, ccVal);
     }
 
-  }
-}
-
-function updateShifts(noteOn, noteNum) {
-  switch(noteNum) {
-    case DRUM_MIX_SHIFT_NOTE:
-      drumMixShift = noteOn;
-      break;
-    case DRUM_PAN_SHIFT_NOTE:
-      drumPanShift = noteOn;
-      break;
-    case DRUM_SEND1_SHIFT_NOTE:
-      drumSend1Shift = noteOn;
-      break;
-    case DRUM_SEND2_SHIFT_NOTE:
-      drumSend2Shift = noteOn;
-      break;
-    default:
-      break;
-  };
-}
-
-function drumShiftOn() {
-  return drumMixShift || drumPanShift || drumSend1Shift || drumSend2Shift;
-}
-
-function getDrumPadIndex(ccNum) {
-  // Slightly complicated due to bank-ordered encoders
-  var bankIndex = getEncoderIndexInBank(ccNum);
-  if (isEncoderInBank1(ccNum)) {
-    if (bankIndex < 4) {
-      return 8 + bankIndex;
-    } else {
-      return bankIndex - 4;
-    }
-  } else if (isEncoderInBank2(ccNum)) {
-    if (bankIndex < 4) {
-      return 12 + bankIndex;
-    } else {
-      return bankIndex;
-    }
   }
 }
 
@@ -142,25 +101,34 @@ function createPadBankIfNecessary() {
   return true;
 }
 
-function handleDrumEncoderInput(ccNum, ccVal) {
+function handleDrumEncoderInput(padIndex, ccNum, ccVal) {
   if (!createPadBankIfNecessary()) {
     return;
   }
 
-  var padIndex = getDrumPadIndex(ccNum);
+  if (!isEncoderInBank1(ccNum)) {
+    return;
+  }
+
+  var encoderBankIndex = getEncoderIndexInBank(ccNum);
   var padChannel = drumPadBank.getChannel(padIndex);
   var increment = getRelativeIncrement(ccVal, 2.0);
 
   padChannel.selectInMixer();
 
-  if (drumMixShift) {
-    padChannel.getVolume().inc(increment, 128);
-  } else if (drumPanShift) {
-    padChannel.getPan().inc(increment, 128);
-  } else if (drumSend1Shift) {
-    padChannel.getSend(0).inc(increment, 128);
-  } else if (drumSend2Shift) {
-    padChannel.getSend(1).inc(increment, 128);
+  switch (encoderBankIndex) {
+    case 0:
+      padChannel.getVolume().inc(increment, 128);
+      break;
+    case 1:
+      padChannel.getSend(0).inc(increment, 128);
+      break;
+    case 4:
+      padChannel.getPan().inc(increment, 128);
+      break;
+    case 5:
+      padChannel.getSend(1).inc(increment, 128);
+      break;
   }
 }
 

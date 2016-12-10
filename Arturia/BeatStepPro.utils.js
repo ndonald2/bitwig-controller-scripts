@@ -1,3 +1,6 @@
+load('../Utils/ArrayUtils.js');
+load('../Utils/MIDIUtils.js');
+
 // Constants
 
 var DEVICE_NAME = "Arturia BeatStep Pro";
@@ -26,8 +29,6 @@ var ENCODER_BANK2_START = 52;
 
 // Util Functions
 
-load('../Utils/MIDIUtils.js')
-
 function isControlModeChannel(status) {
   var channel = getMidiChannel(status);
   return channel == CONTROL_MODE_CHANNEL;
@@ -53,3 +54,17 @@ function getEncoderIndexInBank(controlNum) {
   }
 }
 
+// Pad buttens indexed the same way the drums are.
+// Bottom left pad is index 0, top right is 15
+//
+// 8 9 10 11 12 13 14 15
+// 0 1  2  3  4  5  6  7
+
+var PAD_START = 36;
+
+function getPadIndex(noteNum) {
+  if (noteNum >= PAD_START && noteNum < PAD_START + 16) {
+    return noteNum - PAD_START;
+  }
+  return null;
+}
