@@ -32,7 +32,7 @@ function exit() {}
 function initializeVariables() {
   inPort = host.getMidiInPort(0);
   outPort = host.getMidiOutPort(0);
-  mainTrackBank = host.createMainTrackBank(8, 0, 0);
+  mainTrackBank = host.createMainTrackBank(8, 2, 0);
 }
 
 function setupChannelRoutings() {
@@ -145,6 +145,13 @@ function getChannelIndex(ccNum) {
 
 function handleMixEncoderInput(ccNum, ccVal) {
   var channelIndex = getChannelIndex(ccNum);
-  println("Channel Index: " + channelIndex);
+  var increment = getRelativeIncrement(ccVal, 2.0);
+  var channel = mainTrackBank.getChannel(channelIndex);
+
+  if (getEncoderIndexInBank(ccNum) < 4) {
+    channel.getSend(0).inc(increment, 128);
+  } else {
+    channel.getSend(1).inc(increment, 128);
+  }
 }
 
