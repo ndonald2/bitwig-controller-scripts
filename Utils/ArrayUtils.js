@@ -1,3 +1,10 @@
+// Perform function on each element of the array
+Array.prototype.forEach = function(f) {
+  for (var i=0; i<this.length; i++) {
+    f(this[i]);
+  }
+};
+
 // Removal by value (all instances)
 Array.prototype.remove = function() {
     var what, a = arguments, L = a.length, ax;

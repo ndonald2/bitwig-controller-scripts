@@ -74,8 +74,11 @@ function handleControlModeMessage(status, data1, data2) {
     }
 
     if (!pressedPads.isEmpty()) {
-      var padIndex = pressedPads.last();
-      handleDrumEncoderInput(padIndex, ccNum, ccVal);
+      if (createPadBankIfNecessary()) {
+        pressedPads.forEach(function(padIndex) {
+          handleDrumEncoderInput(padIndex, ccNum, ccVal);
+        });
+      }
     } else {
       handleMixEncoderInput(ccNum, ccVal);
     }
@@ -102,10 +105,6 @@ function createPadBankIfNecessary() {
 }
 
 function handleDrumEncoderInput(padIndex, ccNum, ccVal) {
-  if (!createPadBankIfNecessary()) {
-    return;
-  }
-
   if (!isEncoderInBank1(ccNum)) {
     return;
   }
@@ -113,8 +112,6 @@ function handleDrumEncoderInput(padIndex, ccNum, ccVal) {
   var encoderBankIndex = getEncoderIndexInBank(ccNum);
   var padChannel = drumPadBank.getChannel(padIndex);
   var increment = getRelativeIncrement(ccVal, 2.0);
-
-  padChannel.selectInMixer();
 
   switch (encoderBankIndex) {
     case 0:
