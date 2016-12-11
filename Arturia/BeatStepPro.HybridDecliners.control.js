@@ -44,7 +44,11 @@ function onMidi(status, data1, data2) {
 
 /// Control Mode
 
+var DRUM_RESET_CC_NUM = 102;
+var DRUM_CHANNEL_INDEX = 0;
+
 var pressedPads = [];
+var drumPadBank = null;
 
 function handleControlModeMessage(status, data1, data2) {
   //println("Got control mode message: " + status + ", " + data1 + ", " + data2);
@@ -69,26 +73,35 @@ function handleControlModeMessage(status, data1, data2) {
     var ccNum = data1;
     var ccVal = data2;
 
-    if (!isEncoderControlNumber(ccNum)) {
-      return;
-    }
+    if (isEncoderControlNumber(ccNum)) {
 
-    if (!pressedPads.isEmpty()) {
-      if (createPadBankIfNecessary()) {
+      // Apply encoder modification to every drum pad pressed down
+      if (!pressedPads.isEmpty()) {
+
         pressedPads.forEach(function(padIndex) {
           handleDrumEncoderInput(padIndex, ccNum, ccVal);
         });
-      }
-    } else {
-      handleMixEncoderInput(ccNum, ccVal);
-    }
 
+      } else {
+
+        handleMixEncoderInput(ccNum, ccVal);
+
+      }
+
+    } else if (ccNum == DRUM_RESET_CC_NUM && ccVal > 0) {
+
+      // Reset all mix params for every drum held down
+      if (!pressedPads.isEmpty()) {
+
+        pressedPads.forEach(function(padIndex) {
+          resetDrumSends(padIndex);
+        });
+
+      }
+
+    }
   }
 }
-
-var DRUM_CHANNEL_INDEX = 0;
-
-var drumPadBank = null;
 
 function createPadBankIfNecessary() {
   if (drumPadBank !== null) {
@@ -105,6 +118,7 @@ function createPadBankIfNecessary() {
 }
 
 function handleDrumEncoderInput(padIndex, ccNum, ccVal) {
+
   if (!isEncoderInBank1(ccNum)) {
     return;
   }
@@ -127,6 +141,12 @@ function handleDrumEncoderInput(padIndex, ccNum, ccVal) {
       padChannel.getSend(1).inc(increment, 128);
       break;
   }
+}
+
+function resetDrumSends(padIndex) {
+  var padChannel = drumPadBank.getChannel(padIndex);
+  padChannel.getSend(0).setRaw(0.0);
+  padChannel.getSend(1).setRaw(0.0);
 }
 
 function getChannelIndex(ccNum) {
