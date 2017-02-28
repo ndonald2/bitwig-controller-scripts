@@ -9,7 +9,7 @@ var SCRIPT_UUID = "b5a7af1c-23b0-4d4c-b8b6-1ef889bbbee2";
 
 var DEVICE_NAME = "LPD8";
 var NUM_PORTS_IN = 1;
-var NUM_PORTS_OUT = 0;
+var NUM_PORTS_OUT = 1;
 
 // Initialization and Controller Definition
 
@@ -18,3 +18,4 @@ host.defineController("Akai", "LPD8 (Generic)", SCRIPT_VERSION, SCRIPT_UUID, "Ni
 host.defineMidiPorts(NUM_PORTS_IN, NUM_PORTS_OUT);
 host.addDeviceNameBasedDiscoveryPair([DEVICE_NAME], [DEVICE_NAME]);
 
+function init() {}
