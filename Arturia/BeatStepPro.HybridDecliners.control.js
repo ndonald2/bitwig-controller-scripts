@@ -3,7 +3,7 @@ load('./BeatStepPro.utils.js');
 
 // Global constants
 
-var SCRIPT_API_VERSION = 1;
+var SCRIPT_API_VERSION = 2;
 var SCRIPT_VERSION = "0.1";
 var SCRIPT_UUID = "af9d9ec7-258a-4415-941f-c506d203b6f0";
 
@@ -31,7 +31,8 @@ function init() {
   inPort.createNoteInput("BeatStep Drum", DRUM_SEQ_INPUT_FILTER);
 
   inPort.setMidiCallback(onMidi);
-  createPadBankIfNecessary();
+
+  createDrumDevice();
 }
 
 function exit() {}
@@ -47,8 +48,10 @@ function onMidi(status, data1, data2) {
 var DRUM_RESET_CC_NUM = 102;
 var DRUM_CHANNEL_INDEX = 0;
 
+var drumChannel;
+var drumDevice;
+var drumPadBank;
 var pressedPads = [];
-var drumPadBank = null;
 
 function handleControlModeMessage(status, data1, data2) {
   //println("Got control mode message: " + status + ", " + data1 + ", " + data2);
@@ -103,29 +106,28 @@ function handleControlModeMessage(status, data1, data2) {
   }
 }
 
-function createPadBankIfNecessary() {
-  if (drumPadBank !== null) {
-    return true;
-  }
-  var drumChannel = mainTrackBank.getChannel(DRUM_CHANNEL_INDEX);
-  var drumRack = drumChannel.getPrimaryInstrument();
-  if (drumRack === null || !drumRack.hasDrumPads()) {
-    println("Could not create drum pad bank: project layout is not valid");
-    return false;
-  }
-  drumPadBank = drumRack.createDrumPadBank(16);
-  return true;
+function createDrumDevice() {
+  drumChannel = host.createCursorTrack(2, 0);
+  drumDevice = drumChannel.createCursorDevice("Primary", 2);
+  drumPadBank = drumDevice.createDrumPadBank(16);
 }
 
 function handleDrumEncoderInput(padIndex, ccNum, ccVal) {
+
+  drumChannel.selectChannel(mainTrackBank.getChannel(0));
+
+  if (!drumDevice.hasDrumPads()) {
+    println("Could not process drum params input: project layout is not valid");
+    return
+  }
 
   if (!isEncoderInBank1(ccNum)) {
     return;
   }
 
+  var increment = getRelativeIncrement(ccVal, 2.0);
   var encoderBankIndex = getEncoderIndexInBank(ccNum);
   var padChannel = drumPadBank.getChannel(padIndex);
-  var increment = getRelativeIncrement(ccVal, 2.0);
 
   switch (encoderBankIndex) {
     case 0:
