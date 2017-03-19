@@ -59,7 +59,9 @@ function handleControlModeMessage(status, data1, data2) {
   if (isNoteOnMessage(status)) {
 
     var padIndex = getPadIndex(data1);
+
     if (padIndex !== null) {
+      selectDrum(padIndex);
       pressedPads.remove(padIndex);
       pressedPads.push(padIndex);
     }
@@ -112,9 +114,13 @@ function createDrumDevice() {
   drumPadBank = drumDevice.createDrumPadBank(16);
 }
 
-function handleDrumEncoderInput(padIndex, ccNum, ccVal) {
+function selectDrum(padIndex) {
+    drumChannel.selectChannel(mainTrackBank.getChannel(0))
+    var padChannel = drumPadBank.getChannel(padIndex);
+    padChannel.selectInMixer();
+}
 
-  drumChannel.selectChannel(mainTrackBank.getChannel(0));
+function handleDrumEncoderInput(padIndex, ccNum, ccVal) {
 
   if (!drumDevice.hasDrumPads()) {
     println("Could not process drum params input: project layout is not valid");
