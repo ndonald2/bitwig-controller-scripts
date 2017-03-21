@@ -27,6 +27,11 @@ var drumTrackBank;
 
 var primaryTrackCursor;
 var primaryDeviceCursor;
+var primaryRemoteControlsCursor;
+
+var drumDeviceChainCursor;
+var drumDeviceBank;
+var drumRemoteControlsCursor;
 
 var selectedDrumIndex = null;
 
@@ -40,9 +45,13 @@ function init() {
   effectTrackBank = host.createEffectTrackBank(NUM_FX_TRACKS, 0);
 
   primaryTrackCursor = host.createCursorTrack(NUM_FX_TRACKS, 0);
-  primaryDeviceCursor = primaryTrackCursor.createCursorDevice("Primary", 2);
+  primaryDeviceCursor = primaryTrackCursor.createCursorDevice("Primary", NUM_FX_TRACKS);
+  primaryRemoteControlsCursor = primaryDeviceCursor.createCursorRemoteControlsPage(8);
 
   drumTrackBank = primaryDeviceCursor.createDrumPadBank(16);
+  drumDeviceChainCursor = primaryDeviceCursor.createCursorLayer();
+  drumDeviceBank = drumDeviceChainCursor.createDeviceBank(1);
+  drumRemoteControlsCursor = drumDeviceBank.getDevice(0).createCursorRemoteControlsPage(8);
 
   inPort.createNoteInput("BeatStep Seq 1", SEQ_1_INPUT_FILTER);
   inPort.createNoteInput("BeatStep Seq 2", SEQ_2_INPUT_FILTER);
@@ -76,7 +85,7 @@ function handleControlModeMessage(status, data1, data2) {
     var ccNum = data1;
     var ccVal = data2;
 
-    if (isStepControlNumber(ccNum)) {
+    if (isStepControlNumber(ccNum) && ccVal > 0) {
       var stepIndex = getStepIndex(ccNum);
       selectChannel(stepIndex);
     }
@@ -84,17 +93,10 @@ function handleControlModeMessage(status, data1, data2) {
     if (isEncoderControlNumber(ccNum)) {
       if (isEncoderInBank1(ccNum)) {
         handleMixEncoderInput(ccNum, ccVal);
+      } else if (isEncoderInBank2(ccNum)) {
+        handleParamEncoderInput(ccNum, ccVal);
       }
     }
-
-    //if (ccNum == DRUM_RESET_CC_NUM && ccVal > 0) {
-    //  // Reset all mix params for every drum held down
-    //  if (!pressedPads.isEmpty()) {
-    //    pressedPads.forEach(function(padIndex) {
-    //      resetDrumSends(padIndex);
-    //    });
-    //  }
-    //}
   }
 }
 
@@ -109,28 +111,25 @@ function selectChannel(index) {
   }
 
   if (channel != null) {
-    channel.selectInMixer();
+    primaryTrackCursor.selectChannel(channel);
+    primaryTrackCursor.selectInMixer();
     selectedDrumIndex = null;
   }
 }
 
 function selectDrum(padIndex) {
     primaryTrackCursor.selectChannel(mainTrackBank.getChannel(0));
-    drumTrackBank.getChannel(padIndex).selectInMixer();
+    var drumPad = drumTrackBank.getChannel(padIndex);
+    drumPad.selectInMixer();
+    drumPad.selectInEditor();
+    //drumDeviceChainCursor.selectChannel(drumPad);
     selectedDrumIndex = padIndex;
 }
 
 function handleMixEncoderInput(ccNum, ccVal) {
-
   var increment = getRelativeIncrement(ccVal, 2.0);
   var encoderBankIndex = getEncoderIndexInBank(ccNum);
-
-  var selectedTrack;
-  if (selectedDrumIndex != null) {
-    selectedTrack = drumTrackBank.getChannel(selectedDrumIndex);
-  } else {
-    selectedTrack = primaryTrackCursor;
-  }
+  var selectedTrack = currentlySelectedTrack();
 
   switch (encoderBankIndex) {
     case 0:
@@ -148,18 +147,23 @@ function handleMixEncoderInput(ccNum, ccVal) {
   }
 }
 
-function resetDrumSends(padIndex) {
-  var padChannel = drumPadBank.getChannel(padIndex);
-  padChannel.getSend(0).setRaw(0.0);
-  padChannel.getSend(1).setRaw(0.0);
+function handleParamEncoderInput(ccNum, ccVal) {
+  var increment = getRelativeIncrement(ccVal, 2.0);
+  var encoderBankIndex = getEncoderIndexInBank(ccNum);
+  var param;
+  if (selectedDrumIndex == null) {
+    param = primaryRemoteControlsCursor.getParameter(encoderBankIndex);
+  } else {
+    param = drumRemoteControlsCursor.getParameter(encoderBankIndex);
+  }
+  param.value().inc(increment, 128);
 }
 
-function getEncoderChannelIndex(ccNum) {
-  var bankIndex = getEncoderIndexInBank(ccNum);
-  var channelIndex = bankIndex % 4;
-  if (isEncoderInBank2(ccNum)) {
-    channelIndex += 4;
+function currentlySelectedTrack() {
+  if (selectedDrumIndex != null) {
+    return drumTrackBank.getChannel(selectedDrumIndex);
+  } else {
+     return primaryTrackCursor;
   }
-  return channelIndex;
 }
 
