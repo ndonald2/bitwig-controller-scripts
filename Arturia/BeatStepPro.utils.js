@@ -54,6 +54,19 @@ function getEncoderIndexInBank(controlNum) {
   }
 }
 
+// Step buttons
+
+var STEP_CC_START = 102;
+var STEP_CC_END = STEP_CC_START + 15;
+
+function isStepControlNumber(controlNum) {
+  return (controlNum >= STEP_CC_START && controlNum <= STEP_CC_END);
+}
+
+function getStepIndex(controlNum) {
+  return controlNum - STEP_CC_START;
+}
+
 // Pad buttens indexed the same way the drums are.
 // Bottom left pad is index 0, top right is 15
 //

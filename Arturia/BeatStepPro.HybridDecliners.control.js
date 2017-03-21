@@ -7,6 +7,8 @@ var SCRIPT_API_VERSION = 2;
 var SCRIPT_VERSION = "0.1";
 var SCRIPT_UUID = "af9d9ec7-258a-4415-941f-c506d203b6f0";
 
+var NUM_FX_TRACKS = 2;
+
 // Initialization and Controller Definition
 
 loadAPI(SCRIPT_API_VERSION);
@@ -18,13 +20,16 @@ host.addDeviceNameBasedDiscoveryPair([DEVICE_NAME], [DEVICE_NAME]);
 var inPort;
 var outPort;
 var mainTrackBank;
+var effectTrackBank;
 
 // Script Overrides
 
 function init() {
   inPort = host.getMidiInPort(0);
   outPort = host.getMidiOutPort(0);
-  mainTrackBank = host.createMainTrackBank(8, 2, 0);
+
+  mainTrackBank = host.createMainTrackBank(16 - NUM_FX_TRACKS, NUM_FX_TRACKS, 0);
+  effectTrackBank = host.createEffectTrackBank(NUM_FX_TRACKS, 0);
 
   inPort.createNoteInput("BeatStep Seq 1", SEQ_1_INPUT_FILTER);
   inPort.createNoteInput("BeatStep Seq 2", SEQ_2_INPUT_FILTER);
@@ -79,21 +84,22 @@ function handleControlModeMessage(status, data1, data2) {
     var ccVal = data2;
 
     if (isEncoderControlNumber(ccNum)) {
-
       // Apply encoder modification to every drum pad pressed down
       if (!pressedPads.isEmpty()) {
-
         pressedPads.forEach(function(padIndex) {
           handleDrumEncoderInput(padIndex, ccNum, ccVal);
         });
-
       } else {
-
         handleMixEncoderInput(ccNum, ccVal);
-
       }
+    }
 
-    } else if (ccNum == DRUM_RESET_CC_NUM && ccVal > 0) {
+    if (isStepControlNumber(ccNum)) {
+      var stepIndex = getStepIndex(ccNum);
+      handleChannelSelection(stepIndex);
+    }
+
+    if (ccNum == DRUM_RESET_CC_NUM && ccVal > 0) {
 
       // Reset all mix params for every drum held down
       if (!pressedPads.isEmpty()) {
@@ -157,7 +163,7 @@ function resetDrumSends(padIndex) {
   padChannel.getSend(1).setRaw(0.0);
 }
 
-function getChannelIndex(ccNum) {
+function getEncoderChannelIndex(ccNum) {
   var bankIndex = getEncoderIndexInBank(ccNum);
   var channelIndex = bankIndex % 4;
   if (isEncoderInBank2(ccNum)) {
@@ -166,8 +172,23 @@ function getChannelIndex(ccNum) {
   return channelIndex;
 }
 
+function handleChannelSelection(index) {
+  var channel = null;
+  var mainTrackCount = 16 - NUM_FX_TRACKS;
+
+  if (index < mainTrackCount) {
+    channel = mainTrackBank.getChannel(index);
+  } else if (index < 16) {
+    channel = effectTrackBank.getChannel(index - mainTrackCount);
+  }
+
+  if (channel != null) {
+    channel.selectInMixer();
+  }
+}
+
 function handleMixEncoderInput(ccNum, ccVal) {
-  var channelIndex = getChannelIndex(ccNum);
+  var channelIndex = getEncoderChannelIndex(ccNum);
   var increment = getRelativeIncrement(ccVal, 2.0);
   var channel = mainTrackBank.getChannel(channelIndex);
 
