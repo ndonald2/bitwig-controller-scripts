@@ -30,7 +30,7 @@ var primaryDeviceCursor;
 var primaryRemoteControlsCursor;
 
 var drumDeviceChainCursor;
-var drumDeviceBank;
+var drumDeviceCursor;
 var drumRemoteControlsCursor;
 
 var selectedDrumIndex = null;
@@ -50,8 +50,8 @@ function init() {
 
   drumTrackBank = primaryDeviceCursor.createDrumPadBank(16);
   drumDeviceChainCursor = primaryDeviceCursor.createCursorLayer();
-  drumDeviceBank = drumDeviceChainCursor.createDeviceBank(1);
-  drumRemoteControlsCursor = drumDeviceBank.getDevice(0).createCursorRemoteControlsPage(8);
+  drumDeviceCursor = drumDeviceChainCursor.createDeviceBank(1).getDevice(0);
+  drumRemoteControlsCursor = drumDeviceCursor.createCursorRemoteControlsPage(8);
 
   inPort.createNoteInput("BeatStep Seq 1", SEQ_1_INPUT_FILTER);
   inPort.createNoteInput("BeatStep Seq 2", SEQ_2_INPUT_FILTER);
@@ -152,8 +152,10 @@ function handleParamEncoderInput(ccNum, ccVal) {
   var encoderBankIndex = getEncoderIndexInBank(ccNum);
   var param;
   if (selectedDrumIndex == null) {
+    primaryDeviceCursor.isRemoteControlsSectionVisible().set(true);
     param = primaryRemoteControlsCursor.getParameter(encoderBankIndex);
   } else {
+    drumDeviceCursor.isRemoteControlsSectionVisible().set(true);
     param = drumRemoteControlsCursor.getParameter(encoderBankIndex);
   }
   param.value().inc(increment, 128);
