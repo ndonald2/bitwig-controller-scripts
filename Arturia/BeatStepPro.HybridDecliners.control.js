@@ -135,7 +135,10 @@ function selectDrum(padIndex) {
 function handleMixEncoderInput(ccNum, ccVal) {
   var increment = getRelativeIncrement(ccVal, 2.0);
   var encoderBankIndex = getEncoderIndexInBank(ccNum);
+
   var selectedTrack = currentlySelectedTrack();
+  var selectedDevice = currentlySelectedDevice();
+  var selectedControls = currentlySelectedRemoteControls();
 
   switch (encoderBankIndex) {
     case 0:
@@ -143,6 +146,20 @@ function handleMixEncoderInput(ccNum, ccVal) {
       break;
     case 1:
       selectedTrack.getSend(0).inc(increment, 128);
+      break;
+    case 2:
+      if (increment > 0) {
+        selectedDevice.selectNext();
+      } else {
+        selectedDevice.selectPrevious();
+      }
+      break;
+    case 3:
+      if (increment > 0) {
+        selectedControls.selectNextPage(false);
+      } else {
+        selectedControls.selectPreviousPage(false);
+      }
       break;
     case 4:
       selectedTrack.getVolume().inc(increment, 128);
