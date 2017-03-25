@@ -47,11 +47,17 @@ function init() {
   primaryTrackCursor = host.createCursorTrack(NUM_FX_TRACKS, 0);
   primaryDeviceCursor = primaryTrackCursor.createCursorDevice("Primary", NUM_FX_TRACKS);
   primaryRemoteControlsCursor = primaryDeviceCursor.createCursorRemoteControlsPage(8);
+  for (var i=0; i<8; i++) {
+    primaryRemoteControlsCursor.getParameter(i).setIndication(true);
+  }
 
   drumTrackBank = primaryDeviceCursor.createDrumPadBank(16);
   drumDeviceChainCursor = primaryDeviceCursor.createCursorLayer();
   drumDeviceCursor = drumDeviceChainCursor.createDeviceBank(1).getDevice(0);
   drumRemoteControlsCursor = drumDeviceCursor.createCursorRemoteControlsPage(8);
+  for (var i=0; i<8; i++) {
+    drumRemoteControlsCursor.getParameter(i).setIndication(true);
+  }
 
   inPort.createNoteInput("BeatStep Seq 1", SEQ_1_INPUT_FILTER);
   inPort.createNoteInput("BeatStep Seq 2", SEQ_2_INPUT_FILTER);
@@ -113,6 +119,7 @@ function selectChannel(index) {
   if (channel != null) {
     primaryTrackCursor.selectChannel(channel);
     primaryTrackCursor.selectInMixer();
+    primaryDeviceCursor.selectInEditor();
     selectedDrumIndex = null;
   }
 }
@@ -122,7 +129,6 @@ function selectDrum(padIndex) {
     var drumPad = drumTrackBank.getChannel(padIndex);
     drumPad.selectInMixer();
     drumPad.selectInEditor();
-    //drumDeviceChainCursor.selectChannel(drumPad);
     selectedDrumIndex = padIndex;
 }
 
