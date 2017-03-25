@@ -156,15 +156,8 @@ function handleMixEncoderInput(ccNum, ccVal) {
 function handleParamEncoderInput(ccNum, ccVal) {
   var increment = getRelativeIncrement(ccVal, 2.0);
   var encoderBankIndex = getEncoderIndexInBank(ccNum);
-  var param;
-  if (selectedDrumIndex == null) {
-    primaryDeviceCursor.isRemoteControlsSectionVisible().set(true);
-    param = primaryRemoteControlsCursor.getParameter(encoderBankIndex);
-  } else {
-    drumDeviceCursor.isRemoteControlsSectionVisible().set(true);
-    param = drumRemoteControlsCursor.getParameter(encoderBankIndex);
-  }
-  param.value().inc(increment, 128);
+  currentlySelectedDevice().isRemoteControlsSectionVisible().set(true);
+  currentlySelectedRemoteControls().getParameter(encoderBankIndex).value().inc(increment, 128);
 }
 
 function currentlySelectedTrack() {
@@ -175,3 +168,18 @@ function currentlySelectedTrack() {
   }
 }
 
+function currentlySelectedDevice() {
+  if (selectedDrumIndex != null) {
+    return drumDeviceCursor;
+  } else {
+     return primaryDeviceCursor;
+  }
+}
+
+function currentlySelectedRemoteControls() {
+  if (selectedDrumIndex != null) {
+    return drumRemoteControlsCursor;
+  } else {
+     return primaryRemoteControlsCursor;
+  }
+}
