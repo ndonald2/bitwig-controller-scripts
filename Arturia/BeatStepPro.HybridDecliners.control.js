@@ -45,11 +45,7 @@ function init() {
   effectTrackBank = host.createEffectTrackBank(NUM_FX_TRACKS, 0);
 
   primaryTrackCursor = host.createCursorTrack(NUM_FX_TRACKS, 0);
-
   primaryDeviceCursor = primaryTrackCursor.createCursorDevice();
-  primaryDeviceCursor.hasNext().markInterested();
-  primaryDeviceCursor.hasPrevious().markInterested();
-
   primaryRemoteControlsCursor = primaryDeviceCursor.createCursorRemoteControlsPage(8);
   for (var i=0; i<8; i++) {
     primaryRemoteControlsCursor.getParameter(i).setIndication(true);
@@ -153,10 +149,11 @@ function handleMixEncoderInput(ccNum, ccVal) {
       selectedTrack.getSend(0).inc(increment, 128);
       break;
     case 2:
+      // For now, only the first device on a drum pad can be selected
       if (selectedDrumIndex != null) { return }
-      if (increment > 0 && selectedDevice.hasNext().get()) {
+      if (increment > 0) {
         selectedDevice.selectNext();
-      } else if (increment < 0 && selectedDevice.hasPrevious().get()) {
+      } else if (increment < 0) {
         selectedDevice.selectPrevious();
       }
       break;
