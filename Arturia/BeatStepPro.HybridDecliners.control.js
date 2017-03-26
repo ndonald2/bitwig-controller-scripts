@@ -45,7 +45,11 @@ function init() {
   effectTrackBank = host.createEffectTrackBank(NUM_FX_TRACKS, 0);
 
   primaryTrackCursor = host.createCursorTrack(NUM_FX_TRACKS, 0);
-  primaryDeviceCursor = primaryTrackCursor.createCursorDevice("Primary", NUM_FX_TRACKS);
+
+  primaryDeviceCursor = primaryTrackCursor.createCursorDevice();
+  primaryDeviceCursor.hasNext().markInterested();
+  primaryDeviceCursor.hasPrevious().markInterested();
+
   primaryRemoteControlsCursor = primaryDeviceCursor.createCursorRemoteControlsPage(8);
   for (var i=0; i<8; i++) {
     primaryRemoteControlsCursor.getParameter(i).setIndication(true);
@@ -54,6 +58,7 @@ function init() {
   drumTrackBank = primaryDeviceCursor.createDrumPadBank(16);
   drumDeviceChainCursor = primaryDeviceCursor.createCursorLayer();
   drumDeviceCursor = drumDeviceChainCursor.createDeviceBank(1).getDevice(0);
+
   drumRemoteControlsCursor = drumDeviceCursor.createCursorRemoteControlsPage(8);
   for (var i=0; i<8; i++) {
     drumRemoteControlsCursor.getParameter(i).setIndication(true);
@@ -148,16 +153,17 @@ function handleMixEncoderInput(ccNum, ccVal) {
       selectedTrack.getSend(0).inc(increment, 128);
       break;
     case 2:
-      if (increment > 0) {
+      if (selectedDrumIndex != null) { return }
+      if (increment > 0 && selectedDevice.hasNext().get()) {
         selectedDevice.selectNext();
-      } else {
+      } else if (increment < 0 && selectedDevice.hasPrevious().get()) {
         selectedDevice.selectPrevious();
       }
       break;
     case 3:
       if (increment > 0) {
         selectedControls.selectNextPage(false);
-      } else {
+      } else if (increment < 0) {
         selectedControls.selectPreviousPage(false);
       }
       break;
