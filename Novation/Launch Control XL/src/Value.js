@@ -71,9 +71,7 @@ Value.Mode.Pickup.setExternal = function(value)
     var d = new Date();
     this.lastExternalChangeTime = d.getTime();
 
-    var diff = Math.abs(this.externalValue - this.internalValue);
-
-    if (diff <= 1) {
+    if (this.externalValue == this.internalValue) {
         this.internalValue = value;
     }
     this.externalValue = value;
