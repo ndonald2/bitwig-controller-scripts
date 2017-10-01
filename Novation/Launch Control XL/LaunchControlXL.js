@@ -41,7 +41,7 @@ function LaunchControlXL()
 
     this.mixerComponent.sendSelectors.set('active', false);
 
-    this.sendLeds = this.addControl(new ControlGroup(Layout[8].leds.slice(0, 2).map(function (messages, sendIndex)
+    this.sendLeds = this.addControl(new ControlGroup(Layout[CHANNEL].leds.slice(0, 2).map(function (messages, sendIndex)
     {
         return new ControlGroup(messages.map(function (message, index)
         {
@@ -49,7 +49,7 @@ function LaunchControlXL()
         }.bind(this)));
     }.bind(this))));
 
-    this.panLeds = this.addControl(new ControlGroup(Layout[8].leds[2].map(function (message, index)
+    this.panLeds = this.addControl(new ControlGroup(Layout[CHANNEL].leds[2].map(function (message, index)
     {
         return new TrackLed(message, Colors.Mixer.Pans, Colors.Mixer.NoTrack, this.mixerComponent.trackBank.getTrack(index));
     }.bind(this))));
@@ -85,7 +85,7 @@ function LaunchControlXL()
         return new DeviceParameterLed(message, Colors.Mapping[index], Colors.Device.NoDevice, this.cursorDevice, index);
     }.bind(this))))
 
-    this.macroLeds = this.addControl(new ControlGroup(Layout[8].leds.map(function (messages, rowIndex)
+    this.macroLeds = this.addControl(new ControlGroup(Layout[CHANNEL].leds.map(function (messages, rowIndex)
     {
         return new ControlGroup(messages.map(function (message, index)
         {
@@ -98,7 +98,7 @@ function LaunchControlXL()
         next: Layout[CHANNEL].navigation.right
     })).set('active', false);
 
-    this.deviceBankSelectors = this.addControl(new ControlGroup(Layout[8].buttons[1].map(function (midiMessage, index)
+    this.deviceBankSelectors = this.addControl(new ControlGroup(Layout[CHANNEL].buttons[1].map(function (midiMessage, index)
     {
         return (new DeviceParameterBankButton(midiMessage, this.cursorDevice, index))
             .set('trueValue', Colors.Device.BankSelected)
