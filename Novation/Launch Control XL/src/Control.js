@@ -143,6 +143,11 @@ Control.prototype.getFeedbackValue = function ()
     return this.value.getInternal();
 };
 
+Control.prototype.isReady = function ()
+{
+   return this.value.isReady();
+}
+
 Control.prototype.getRangedValue = function ()
 {
     return this.value.getInternal();

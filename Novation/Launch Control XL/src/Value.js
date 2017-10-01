@@ -31,17 +31,38 @@ Value.prototype.setMode = function(mode)
 
     this.setInternal = Mode.setInternal.bind(this);
     this.setExternal = Mode.setExternal.bind(this);
+    this.isReady = Mode.isReady.bind(this);
 };
+Value.prototype.showPickupIndicator = function (value)
+{
+  var isAboveTarget = (value > this.internalValue);
+  var lower = isAboveTarget ? this.internalValue : 0;
+  var upper = isAboveTarget ? this.max : this.internalValue;
+  var scaleIdx = Math.round(((value - lower) / (upper - lower)) * 15.0);
+  console.log("L: " + lower + " U: " + upper + " I: " + scaleIdx);
 
-Value.prototype._isControllingExternally = function()
+  var notification = "Pickup : [";
+  var bars = "----------------";
+  var indicatorBars = bars.substr(0, scaleIdx) + "0" + bars.substr(scaleIdx + 1);
+
+  if (isAboveTarget) {
+      notification = notification + bars + "|";
+      notification = notification + indicatorBars + "]";
+  } else {
+      notification = notification + indicatorBars + "|";
+      notification = notification + bars + "]";
+  }
+  host.showPopupNotification(notification);
+};
+Value.prototype._isControllingExternally = function ()
 {
     var d = new Date();
     return d.getTime() - this.lastExternalChangeTime < 100;
 };
 
 Value.Mode = {};
-Value.Mode.Direct = {};
 
+Value.Mode.Direct = {};
 Value.Mode.Direct.setInternal = function(value)
 {
     this.internalValue = value;
@@ -56,6 +77,11 @@ Value.Mode.Direct.setExternal = function(value)
     this.internalValue = value;
     return this;
 };
+Value.Mode.Direct.isReady = function ()
+{
+    return true;
+};
+
 Value.Mode.Pickup = {};
 Value.Mode.Pickup.setInternal = function(value)
 {
@@ -73,10 +99,15 @@ Value.Mode.Pickup.setExternal = function(value)
 
     if (this.externalValue == this.internalValue) {
         this.internalValue = value;
+    } else {
+        this.showPickupIndicator(value);
     }
     this.externalValue = value;
 
     return this;
+};
+Value.Mode.Pickup.isReady = function() {
+  return this.internalValue == this.externalValue;
 };
 
 Value.Mode.Scale = {};
@@ -122,4 +153,7 @@ Value.Mode.Scale.setExternal = function(value)
 
     return this;
 };
-
+Value.Mode.Scale.isReady = function ()
+{
+    return true;
+};

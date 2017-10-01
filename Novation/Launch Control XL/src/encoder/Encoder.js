@@ -19,7 +19,9 @@ Encoder.prototype.connectParameter = function (parameter)
     Control.prototype.connectParameter.call(this, parameter);
     this.on('trigger', function (currentValue, oldValue)
     {
-        parameter.set(this.getRangedValue(currentValue, oldValue), this.resolution);
+        if (this.isReady()) {
+            parameter.set(this.getRangedValue(currentValue, oldValue), this.resolution);
+        }
     }.bind(this));
     return this;
 };
