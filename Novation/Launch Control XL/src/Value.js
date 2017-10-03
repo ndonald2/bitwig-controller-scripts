@@ -39,7 +39,6 @@ Value.prototype.showPickupIndicator = function (value)
   var lower = isAboveTarget ? this.internalValue : 0;
   var upper = isAboveTarget ? this.max : this.internalValue;
   var scaleIdx = Math.round(((value - lower) / (upper - lower)) * 15.0);
-  console.log("L: " + lower + " U: " + upper + " I: " + scaleIdx);
 
   var notification = "Pickup : [";
   var bars = "----------------";
