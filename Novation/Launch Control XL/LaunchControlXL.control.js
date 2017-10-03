@@ -8,6 +8,7 @@ load('src/index.js');
 load('Colors.js');
 load('Layout.js');
 load('LaunchControlXL.js');
+load('DrumMachine.js');
 
 var main;
 
@@ -19,8 +20,9 @@ function init()
     var port = new MidiPort(host, 0);
 
     var launchControlXL = new LaunchControlXL();
+    var drumMachine = new DrumMachine();
 
-    main = new ControlGroup([launchControlXL]);
+    main = new ControlGroup([launchControlXL, drumMachine]);
     main.set('midiPort', port);
 
     port.on('sysex', function (data)
@@ -29,6 +31,7 @@ function init()
         {
             var program = data.hexByteAt(7);
             launchControlXL.set('active', program === 8);
+            drumMachine.set('active', program === 0);
         }
     });
 
