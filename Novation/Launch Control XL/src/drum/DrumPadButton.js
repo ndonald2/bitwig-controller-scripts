@@ -1,6 +1,6 @@
 function DrumPadButton(message, drumPadBank, index)
 {
-    Button.call(this, message);
+    Button.call(this, message, Button.TYPE_MOMENTARY);
 
     this.index = index;
     this.drumScrollOffset = -1;

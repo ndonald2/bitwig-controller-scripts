@@ -13,7 +13,7 @@ function DrumMachine()
     this.trackBank = host.createMainTrackBank(8, 0, 0);
     this.trackBank.addChannelCountObserver(this.updateDrumTrackConnection.bind(this));
 
-    this.cursorTrack = host.createCursorTrack(DRUM_TRACK_ID, "DrumMachine", 0, 0, false);
+    this.cursorTrack = host.createCursorTrack(DRUM_TRACK_ID, "DrumMachine", 2, 0, false);
     this.cursorTrack.exists().addValueObserver(function (exists) {
         if (!exists) { this.updateDrumTrackConnection(); }
     }.bind(this));
@@ -25,16 +25,36 @@ function DrumMachine()
 
     var layout = Layout[DRUM_CHANNEL];
 
+    this.sendLeds = this.addControl(new ControlGroup(layout.leds.slice(0, 2).map(function (messages, sendIndex) {
+        return new ControlGroup(messages.map(function (message, index) {
+            var channel = this.drumPadBank.getChannel(index);
+            return new TrackSendLed(message, Colors.Mixer.Sends, Colors.Mixer.NoTrack, channel, sendIndex);
+        }.bind(this)));
+    }.bind(this))));
+
+    this.sends = this.addControl(new ControlGroup(layout.encoders.slice(0, 2).map(function (messages, sendIndex) {
+        return new ControlGroup(messages.map(function (message, index) {
+            var channel = this.drumPadBank.getChannel(index);
+            return (new TrackSendEncoder(message, channel, sendIndex));
+        }.bind(this)));
+    }.bind(this))));
+
+    this.panLeds = this.addControl(new ControlGroup(layout.leds[2].map(function (message, index) {
+        var channel = this.drumPadBank.getChannel(index);
+        return new TrackLed(message, Colors.Mixer.Pans, Colors.Mixer.NoTrack, channel);
+    }.bind(this))));
+
+    this.pans = this.addControl(new ControlGroup(layout.encoders[2].map(function (message, index) {
+        var channel = this.drumPadBank.getChannel(index);
+        return new TrackPanEncoder(message, channel);
+    }.bind(this))));
+
     this.faders = this.addControl(new ControlGroup(layout.faders.map(function (message, index) {
         var channel = this.drumPadBank.getChannel(index);
         return new TrackVolumeEncoder(message, channel);
     }.bind(this))));
 
-    // Proof of concept note lighting
-
-    this.drumScrollOffset = 0
-    this.drumPadBank.addChannelScrollPositionObserver(this.set.bind(this, 'drumScrollOffset'), -1);
-    this.noteButtons = this.addControl(new ControlGroup(layout.buttons[1].map(function (message, index) {
+    this.feedbackButtons = this.addControl(new ControlGroup(layout.buttons[1].map(function (message, index) {
         return new DrumPadButton(message, this.drumPadBank, index);
     }.bind(this))));
 
