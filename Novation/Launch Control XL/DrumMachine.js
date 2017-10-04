@@ -2,6 +2,7 @@ var DRUM_CHANNEL = 0;
 var DRUM_TRACK_ID = "LCXLDrumMachine";
 
 load('src/drum/DrumPadButton.js');
+load('src/drum/DrumPadSelectorButtons.js');
 
 function DrumMachine()
 {
@@ -58,10 +59,18 @@ function DrumMachine()
         return new DrumPadButton(message, this.drumPadBank, index);
     }.bind(this))));
 
+    this.padSelectors = this.addControl(new DrumPadSelectorButtons({
+        previous: layout.navigation.up,
+        next: layout.navigation.down
+    }, this.drumPadBank));
+
     // Retry finding drum device when template activated
 
     this.on('activeChanged', function(active) {
-        if (active) { this.updateDrumTrackConnection(); }
+        if (active) {
+            this.updateDrumTrackConnection();
+            this.drumPadBank.scrollToChannel(36);
+        }
     }.bind(this));
 }
 

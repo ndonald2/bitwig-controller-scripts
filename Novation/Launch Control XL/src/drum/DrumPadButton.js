@@ -11,6 +11,8 @@ function DrumPadButton(message, drumPadBank, index)
     this.channel = drumPadBank.getChannel(index);
     this.connectTrack(this.channel);
     this.channel.addNoteObserver(this.onNote.bind(this));
+
+    this.on('drumScrollOffsetChanged', this.value.setInternal.bind(this, false));
 };
 
 util.inherits(DrumPadButton, Button);
