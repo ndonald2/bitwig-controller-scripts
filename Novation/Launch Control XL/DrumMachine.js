@@ -1,6 +1,8 @@
 var DRUM_CHANNEL = 0;
 var DRUM_TRACK_ID = "LCXLDrumMachine";
 
+load('src/drum/DrumPadButton.js');
+
 function DrumMachine()
 {
     ControlGroup.call(this);
@@ -23,34 +25,23 @@ function DrumMachine()
 
     var layout = Layout[DRUM_CHANNEL];
 
-    this.faders = this.addControl(new ControlGroup(layout.faders.map(function (message, index)
-    {
+    this.faders = this.addControl(new ControlGroup(layout.faders.map(function (message, index) {
         var channel = this.drumPadBank.getChannel(index);
         return new TrackVolumeEncoder(message, channel);
     }.bind(this))));
 
     // Proof of concept note lighting
 
-    this.drumPadBank.addChannelScrollPositionObserver(function (pos) {
-      this.drumScrollOffset = pos;
-    }.bind(this), -1);
-
-    this.noteButtons = this.addControl(new ControlGroup(layout.buttons[0].map(function (message, index)
-    {
-        var button = new Button(message);
-        var channel = this.drumPadBank.getChannel(index);
-        channel.addNoteObserver(function (on, key, velocity) {
-            if (key - this.drumScrollOffset == index) {
-              button.emit('midi', message.hexByteAt(0), message.hexByteAt(1), on == true ? 0x3E : 0x00);
-            }
-        }.bind(this));
-        return button;
+    this.drumScrollOffset = 0
+    this.drumPadBank.addChannelScrollPositionObserver(this.set.bind(this, 'drumScrollOffset'), -1);
+    this.noteButtons = this.addControl(new ControlGroup(layout.buttons[1].map(function (message, index) {
+        return new DrumPadButton(message, this.drumPadBank, index);
     }.bind(this))));
 
     // Retry finding drum device when template activated
 
     this.on('activeChanged', function(active) {
-        if (active) { this._updateDrumTrackConnection(); }
+        if (active) { this.updateDrumTrackConnection(); }
     }.bind(this));
 }
 
