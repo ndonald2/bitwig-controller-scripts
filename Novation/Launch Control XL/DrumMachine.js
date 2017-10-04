@@ -25,10 +25,8 @@ function DrumMachine()
 
     this.faders = this.addControl(new ControlGroup(layout.faders.map(function (message, index)
     {
-        var encoder = new Encoder(message);
         var channel = this.drumPadBank.getChannel(index);
-        encoder.connectParameter(channel.getVolume());
-        return encoder;
+        return new TrackVolumeEncoder(message, channel);
     }.bind(this))));
 
     // Proof of concept note lighting
