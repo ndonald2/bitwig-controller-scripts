@@ -70,6 +70,14 @@ function DrumMachine()
         return layout.encoders.map(function (row, _) { return row[colIndex]; });
     });
 
+    this.deviceEncoders = this.addControl(new ControlGroup(encoderColumns.map(function (messages, colIndex) {
+        return new ControlGroup(messages.map(function(message, rowIndex) {
+            var channel = this.drumPadBank.getChannel(colIndex);
+            var device = channel.createDeviceBank(1).getDevice(0);
+            return new DeviceParameterEncoder(message, device, rowIndex);
+        }.bind(this)));
+    }.bind(this)))).set('active', false);
+
     this.faders = this.addControl(new ControlGroup(layout.faders.map(function (message, index) {
         var channel = this.drumPadBank.getChannel(index);
         return new TrackVolumeEncoder(message, channel);
@@ -126,7 +134,7 @@ DrumMachine.prototype.toggleEncoderMode = function () {
 
 DrumMachine.prototype.switchEncoderMode = function (mode) {
 
-    host.showPopupNotification('Encoder Mode: ' + ({'device': 'Drum Voice Parameters', 'pan': 'Sends/Panning', device: 'Sends/Device'})[mode]);
+    host.showPopupNotification('Encoder Mode: ' + ({'device': 'Drum Voice Parameters', 'pan': 'Sends/Panning', device: 'Drum Device Params'})[mode]);
 
     this._encoderMode = mode;
 
@@ -138,8 +146,5 @@ DrumMachine.prototype.switchEncoderMode = function (mode) {
     this.panLeds.set('active', mode === 'pan');
 
     this.deviceLeds.set('active', mode === 'device');
-    //this.deviceEncoders.set('active', mode === 'device');
-
-    //this.macroLeds.set('active', mode === 'macro');
-    //this.modeDeviceButton.value.setInternal(mode === 'device' ? Colors.Button.On : Colors.Button.Off);
+    this.deviceEncoders.set('active', mode === 'device');
 };
