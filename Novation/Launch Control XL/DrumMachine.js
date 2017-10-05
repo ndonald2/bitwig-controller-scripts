@@ -10,6 +10,8 @@ function DrumMachine()
 {
     ControlGroup.call(this);
 
+    this._encoderMode = 'pan';
+
     this.selectedChannel = 0;
     this.on('selectedChannelChanged', this.selectedChannelChanged.bind(this));
 
@@ -66,6 +68,9 @@ function DrumMachine()
         next: layout.navigation.down
     }, this.drumPadBank));
 
+    this.modeDeviceButton = this.addControl(new Button(layout.navigation.device))
+        .on('tap', this.toggleEncoderMode.bind(this));
+
     // Retry finding drum device when template activated
 
     this.on('activeChanged', function(active) {
@@ -96,4 +101,28 @@ DrumMachine.prototype.drumPadsExistChanged = function (exists) {
     } else {
         console.log("Drum device not found on channel " + this.selectedChannel);
     }
+};
+
+DrumMachine.prototype.toggleEncoderMode = function () {
+    this._encoderMode = this._encoderMode === 'pan' ? 'device' : 'pan';
+    this.switchEncoderMode(this._encoderMode);
+};
+
+DrumMachine.prototype.switchEncoderMode = function (mode) {
+
+    host.showPopupNotification('Encoder Mode: ' + ({'device': 'Drum Voice Parameters', 'pan': 'Sends/Panning', device: 'Sends/Device'})[mode]);
+
+    this._encoderMode = mode;
+
+    this.modeDeviceButton.value.setInternal(mode === 'device');
+
+    this.sends.set('active', mode === 'pan');
+    this.sendLeds.set('active', mode === 'pan');
+    this.pans.set('active', mode === 'pan');
+    this.panLeds.set('active', mode === 'pan');
+
+    //this.macroLeds.set('active', mode === 'macro');
+    //this.deviceLeds.set('active', mode === 'device');
+    //this.deviceEncoders.set('active', mode === 'device');
+    //this.modeDeviceButton.value.setInternal(mode === 'device' ? Colors.Button.On : Colors.Button.Off);
 };
