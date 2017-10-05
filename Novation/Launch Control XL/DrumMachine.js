@@ -1,4 +1,6 @@
 var DRUM_CHANNEL = 0;
+var DRUM_MIN_PAD_OFFSET = 36;
+var DRUM_MAX_PAD_OFFSET = 44;
 var DRUM_TRACK_ID = "LCXLDrumMachine";
 
 load('src/drum/DrumPadButton.js');
@@ -69,7 +71,7 @@ function DrumMachine()
     this.on('activeChanged', function(active) {
         if (active) {
             this.updateDrumTrackConnection();
-            this.drumPadBank.scrollToChannel(36);
+            this.drumPadBank.scrollToChannel(DRUM_MIN_PAD_OFFSET);
         }
     }.bind(this));
 }
