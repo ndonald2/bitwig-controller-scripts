@@ -21,6 +21,7 @@ function init()
 
     var launchControlXL = new LaunchControlXL();
     var drumMachine = new DrumMachine();
+    drumMachine.set('active', false);
 
     main = new ControlGroup([launchControlXL, drumMachine]);
     main.set('midiPort', port);
