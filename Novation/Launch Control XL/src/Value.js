@@ -96,7 +96,8 @@ Value.Mode.Pickup.setExternal = function(value)
     var d = new Date();
     this.lastExternalChangeTime = d.getTime();
 
-    if (this.externalValue == this.internalValue) {
+    var diff = Math.abs(value - this.internalValue);
+    if (diff <= 1) {
         this.internalValue = value;
     } else {
         this.showPickupIndicator(value);
