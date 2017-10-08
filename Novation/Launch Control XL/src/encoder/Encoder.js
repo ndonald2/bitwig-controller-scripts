@@ -9,6 +9,9 @@ util.inherits(Encoder, Control);
 Encoder.prototype._handleTrigger = function (status, data1, value)
 {
     this.value.setExternal(value);
+    if (this.value.isReady()) {
+        this.emit('valueChanged', this.value.internalValue);
+    }
 };
 
 /**
@@ -17,11 +20,8 @@ Encoder.prototype._handleTrigger = function (status, data1, value)
 Encoder.prototype.connectParameter = function (parameter)
 {
     Control.prototype.connectParameter.call(this, parameter);
-    this.on('trigger', function (currentValue, oldValue)
-    {
-        if (this.isReady()) {
-            parameter.set(this.getRangedValue(currentValue, oldValue), this.resolution);
-        }
+    this.on('valueChanged', function (value) {
+        parameter.set(value, this.resolution);
     }.bind(this));
     return this;
 };

@@ -106,7 +106,7 @@ Value.Mode.Pickup.setExternal = function(value)
     return this;
 };
 Value.Mode.Pickup.isReady = function() {
-  return this.internalValue == this.externalValue;
+  return this.internalValue === this.externalValue;
 };
 
 Value.Mode.Scale = {};
