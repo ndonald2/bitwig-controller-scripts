@@ -50,10 +50,6 @@ EventEmitter.prototype.set = function (property, newValue)
     if (oldValue !== newValue)
     {
         this.emit(property + 'Changed', newValue, oldValue);
-        if (property === 'active')
-        {
-            this.emit(newValue ? 'activated' : 'deactivated');
-        }
     }
     return this;
 };
