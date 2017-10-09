@@ -82,6 +82,7 @@ Value.Mode.Direct.isReady = function ()
 };
 
 Value.Mode.Pickup = {};
+Value.Mode.Pickup.THRESHOLD = 2.0;
 Value.Mode.Pickup.setInternal = function(value)
 {
     if (this._isControllingExternally()) {
@@ -97,7 +98,7 @@ Value.Mode.Pickup.setExternal = function(value)
     this.lastExternalChangeTime = d.getTime();
 
     var diff = Math.abs(value - this.internalValue);
-    if (diff <= 1) {
+    if (diff <= Value.Mode.Pickup.THRESHOLD) {
         this.internalValue = value;
     } else {
         this.showPickupIndicator(value);
