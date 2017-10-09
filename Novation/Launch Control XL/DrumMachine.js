@@ -83,7 +83,7 @@ function DrumMachine()
         return new TrackVolumeEncoder(message, channel);
     }.bind(this))));
 
-    this.feedbackButtons = this.addControl(new ControlGroup(layout.buttons[1].map(function (message, index) {
+    this.feedbackButtons = this.addControl(new ControlGroup(layout.buttons[0].map(function (message, index) {
         return new DrumPadButton(message, this.drumPadBank, index);
     }.bind(this))));
 
