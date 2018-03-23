@@ -38,6 +38,7 @@ function init()
 
 }
 
+
 function exit()
 {
     main.onExit();

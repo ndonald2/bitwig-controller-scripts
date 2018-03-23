@@ -1,7 +1,6 @@
 var DRUM_CHANNEL = 0;
 var DRUM_MIN_PAD_OFFSET = 36;
 var DRUM_MAX_PAD_OFFSET = 44;
-var DRUM_TRACK_ID = "LCXLDrumMachine";
 
 load('src/drum/DrumPadButton.js');
 load('src/drum/DrumPadSelectorButtons.js');
@@ -18,7 +17,7 @@ function DrumMachine()
     this.trackBank = host.createMainTrackBank(8, 0, 0);
     this.trackBank.addChannelCountObserver(this.updateDrumTrackConnection.bind(this));
 
-    this.cursorTrack = host.createCursorTrack(DRUM_TRACK_ID, "DrumMachine", 2, 0, false);
+    this.cursorTrack = host.createCursorTrack("DrumMachine", 2, 0);
     this.cursorTrack.exists().addValueObserver(function (exists) {
         if (!exists) { this.updateDrumTrackConnection(); }
     }.bind(this));
