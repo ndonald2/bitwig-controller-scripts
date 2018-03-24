@@ -58,9 +58,9 @@ function DrumMachine()
     });
 
     this.deviceLeds = this.addControl( new ControlGroup(ledColumns.map(function (messages, colIndex) {
+        var channel = this.drumPadBank.getChannel(colIndex);
+        var device = channel.createDeviceBank(1).getDevice(0);
         return new ControlGroup(messages.map(function (message, rowIndex) {
-            var channel = this.drumPadBank.getChannel(colIndex);
-            var device = channel.createDeviceBank(1).getDevice(0);
             return new DeviceParameterLed(message, 15 /*red*/, Colors.Device.NoDevice, device, rowIndex);
         }.bind(this)));
     }.bind(this)))).set('active', false);
@@ -70,9 +70,9 @@ function DrumMachine()
     });
 
     this.deviceEncoders = this.addControl(new ControlGroup(encoderColumns.map(function (messages, colIndex) {
+        var channel = this.drumPadBank.getChannel(colIndex);
+        var device = channel.createDeviceBank(1).getDevice(0);
         return new ControlGroup(messages.map(function(message, rowIndex) {
-            var channel = this.drumPadBank.getChannel(colIndex);
-            var device = channel.createDeviceBank(1).getDevice(0);
             return new DeviceParameterEncoder(message, device, rowIndex);
         }.bind(this)));
     }.bind(this)))).set('active', false);
