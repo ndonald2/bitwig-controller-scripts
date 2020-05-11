@@ -1,0 +1,3 @@
+[submodule "Novation/Launchpad"]
+	path = Novation/Launchpad
+	url = git@github.com:ndonald2/novation-launchpad.git
